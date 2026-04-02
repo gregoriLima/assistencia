@@ -140,7 +140,7 @@
 
     async function sendEmail(attendance, id) {
       try {
-        const response = await fetch('https://zoom.vercel.app/api/send-email', {
+        const response = await fetch('/api/send-email', {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json'
