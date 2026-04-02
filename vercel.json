@@ -1,0 +1,36 @@
+{
+	"cleanUrls": true,
+	"trailingSlash": false,
+	"headers": [
+		{
+			"source": "/(.*)",
+			"headers": [
+				{
+					"key": "Access-Control-Allow-Origin",
+					"value": "*"
+				}
+			]
+		}
+	],
+	"builds": [
+		{
+			"src": "public/*",
+			"use": "@vercel/static"
+		},
+		{
+			"src": "zoom-custom-features.js",
+			"use": "@vercel/static"
+		},
+		{
+			"src": "api/*.js",
+			"use": "@vercel/node"
+		}
+	],
+	"rewrites":
+	"redirects": [
+		{
+			"source": "/email",
+			"destination": "/public/attendance-registry.html"
+		}
+	]
+}

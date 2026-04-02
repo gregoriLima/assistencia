@@ -1,0 +1,25 @@
+{
+  "name": "assistencia",
+  "version": "1.0.0",
+  "description": "assistencia script hosted on Vercel for use of serverless functions",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregoriLima/assistencia.git"
+  },
+  "scripts": {},
+  "keywords": [
+    "assistencia cloud meetings",
+    "assistencia script",
+    "assistencia",
+    "vercel",
+    "serverless"
+  ],
+  "author": "Grégori Lima",
+  "license": "ISC",
+  "homepage": "https://github.com/gregoriLima/assistencia",
+  "dependencies": {
+    "googleapis": "^72.0.0",
+    "moment": "^2.27.0",
+    "nodemailer": "^7.0.5"
+  }
+}
