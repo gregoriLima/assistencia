@@ -14,7 +14,7 @@
 	],
 	"builds": [
 		{
-			"src": "assistencia.html",
+			"src": "index.html",
 			"use": "@vercel/static"
 		},
 		{
@@ -24,12 +24,12 @@
 	],
 	"rewrites": [
 		{
-			"source": "/",
-			"destination": "/assistencia.html"
+			"source": "/email",
+			"destination": "/"
 		},
 		{
-			"source": "/email",
-			"destination": "/assistencia.html"
+			"source": "/assistencia",
+			"destination": "/"
 		}
 	]
 }
