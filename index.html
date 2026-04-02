@@ -107,7 +107,7 @@
   <main>
     <label>
       Assistência:
-      <input id="attendance" type="text" />
+      <input id="attendance" type="text" inputmode="numeric" maxlength="3" pattern="\d{1,3}" />
     </label>
     <label>
       Congregação:
@@ -119,11 +119,21 @@
 
   <script type="application/javascript">
     function bindEvents() {
+      const attendanceField = document.querySelector('#attendance');
+
+      attendanceField.addEventListener('input', () => {
+        attendanceField.value = sanitizeAttendance(attendanceField.value);
+      });
+
       document.querySelector('#send').onclick = () => {
         const { attendance, id } = getFields();
 
         if (!attendance || !id) {
           return alert(!attendance ? 'Informe a assistência' : 'Informe a congregação');
+        }
+
+        if (!isValidAttendance(attendance)) {
+          return alert('Informe uma assistência com até 3 dígitos');
         }
 
         if (confirm(`confirmar envio da assistência de ${attendance}?`)) {
@@ -132,8 +142,16 @@
       };
     }
 
+    function sanitizeAttendance(value) {
+      return value.replace(/\D/g, '').slice(0, 3);
+    }
+
+    function isValidAttendance(value) {
+      return /^\d{1,3}$/.test(value);
+    }
+
     function getFields() {
-      const attendance = document.querySelector('#attendance').value;
+      const attendance = sanitizeAttendance(document.querySelector('#attendance').value);
       const id = document.querySelector('#id').value;
       return { attendance, id };
     }
