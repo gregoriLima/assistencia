@@ -14,11 +14,7 @@
 	],
 	"builds": [
 		{
-			"src": "public/*",
-			"use": "@vercel/static"
-		},
-		{
-			"src": "zoom-custom-features.js",
+			"src": "assistencia.html",
 			"use": "@vercel/static"
 		},
 		{
@@ -26,11 +22,14 @@
 			"use": "@vercel/node"
 		}
 	],
-	"rewrites":
-	"redirects": [
+	"rewrites": [
+		{
+			"source": "/",
+			"destination": "/assistencia.html"
+		},
 		{
 			"source": "/email",
-			"destination": "/public/attendance-registry.html"
+			"destination": "/assistencia.html"
 		}
 	]
 }
