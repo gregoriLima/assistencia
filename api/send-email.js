@@ -1,14 +1,31 @@
 const nodemailer = require('nodemailer');
-const moment = require('moment');
-require('moment/locale/pt-br');
 const { Redis } = require('@upstash/redis');
 
 const { allowCors } = require('../helpers');
+
+const TIME_ZONE = 'America/Sao_Paulo';
 
 const redis = new Redis({
 	url: process.env.UPSTASH_REDIS_REST_URL,
 	token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
+
+const getNowParts = (date = new Date()) => {
+	const formatter = new Intl.DateTimeFormat('pt-BR', {
+		timeZone: TIME_ZONE,
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit',
+		weekday: 'long',
+	});
+	const parts = formatter.formatToParts(date);
+	const map = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]));
+	return {
+		dateKey: `${map.year}-${map.month}-${map.day}`,
+		meetingLabel: `${map.day}/${map.month}/${map.year} - ${map.weekday}`,
+		monthKey: `${map.year}-${map.month}`,
+	};
+};
 
 const getHtmlBody = (attendance = 'Não informado', congregation = 'Nordeste', meeting) => {
 	return `
@@ -32,7 +49,7 @@ const getHtmlBody = (attendance = 'Não informado', congregation = 'Nordeste', m
 const sendEmail = async (req, res) => {
 	try {
 		const { attendance, id } = req.body;
-		const meeting = moment.locale('pt-br') && moment().format('DD/MM/YYYY - dddd');
+		const { dateKey, meetingLabel, monthKey } = getNowParts();
 
 		const { GMAIL_USER, GMAIL_PASS, EMAIL_TO, ATTENDANCE_ID } = process.env;
 
@@ -55,16 +72,25 @@ const sendEmail = async (req, res) => {
 		const info = await transporter.sendMail({
 			from: GMAIL_USER,
 			to: EMAIL_TO,
-			subject: `Assistência Nordeste - ${meeting}`,
-			html: getHtmlBody(attendance, id, meeting)
+			subject: `Assistência Nordeste - ${meetingLabel}`,
+			html: getHtmlBody(attendance, id, meetingLabel)
 		});
 
 		console.log(JSON.stringify(info, null, 4));
 
-		const dateKey = moment().format('YYYY-MM-DD');
-		const redisKey = `${id}:${dateKey}`;
-		await redis.set(redisKey, attendance);
-		console.log(`Redis salvo: ${redisKey} = ${attendance}`);
+		const payload = JSON.stringify({
+			attendance: Number(attendance),
+			submittedAt: new Date().toISOString(),
+		});
+		const legacyKey = `${id}:${dateKey}`;
+		const monthsKey = `attendance:months:${id}`;
+		const monthHashKey = `attendance:${id}:${monthKey}`;
+
+		await redis.set(legacyKey, String(attendance));
+		await redis.sadd(monthsKey, monthKey);
+		await redis.hset(monthHashKey, { [dateKey]: payload });
+		console.log(`Redis salvo: ${legacyKey} = ${attendance}`);
+		console.log(`Redis hash salvo: ${monthHashKey}[${dateKey}] = ${payload}`);
 
 		res.status(200).json({ success: true, message: 'E-mail enviado com sucesso!' });
 	} catch (error) {
