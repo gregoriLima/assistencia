@@ -168,11 +168,16 @@
             attendance
           })
         });
-        const { success, message } = await response.json();
-        const defaultMessage = success ? 'E-mail enviado' : 'Não foi possível enviar e-mail';
-        alert(message || defaultMessage);
+        let data;
+        try {
+          data = await response.json();
+        } catch (_) {
+          return alert(`Erro inesperado do servidor (${response.status})`);
+        }
+        const defaultMessage = data.success ? 'E-mail enviado' : 'Não foi possível enviar e-mail';
+        alert(data.message || defaultMessage);
       } catch (error) {
-        alert(error);
+        alert(`Falha na requisição: ${error.message}`);
       }
     }
 
