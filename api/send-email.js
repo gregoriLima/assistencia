@@ -57,8 +57,13 @@ const sendEmail = async (req, res) => {
 
 		res.status(200).json({ success: true, message: 'E-mail enviado com sucesso!' });
 	} catch (error) {
-		console.log(JSON.stringify(error, null, 4));
-		res.status(500).json({ success: false, message: 'Dados incorretos!' });
+		console.error('send-email error:', error?.message, error?.code, error?.responseCode);
+		const detail = error?.responseCode === 535 || error?.code === 'EAUTH'
+			? 'Falha na autenticação do Gmail. Verifique GMAIL_USER e GMAIL_PASS.'
+			: error?.code === 'ECONNECTION' || error?.code === 'ETIMEDOUT'
+			? 'Não foi possível conectar ao Gmail. Verifique as variáveis de ambiente.'
+			: `Erro interno: ${error?.message || 'desconhecido'}`;
+		res.status(500).json({ success: false, message: detail });
 	}
 };
 
