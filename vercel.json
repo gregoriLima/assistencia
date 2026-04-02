@@ -12,16 +12,6 @@
 			]
 		}
 	],
-	"builds": [
-		{
-			"src": "index.html",
-			"use": "@vercel/static"
-		},
-		{
-			"src": "api/*.js",
-			"use": "@vercel/node"
-		}
-	],
 	"rewrites": [
 		{
 			"source": "/email",
