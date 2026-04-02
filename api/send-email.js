@@ -1,8 +1,14 @@
 const nodemailer = require('nodemailer');
 const moment = require('moment');
 require('moment/locale/pt-br');
+const { Redis } = require('@upstash/redis');
 
 const { allowCors } = require('../helpers');
+
+const redis = new Redis({
+	url: process.env.UPSTASH_REDIS_REST_URL,
+	token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
 
 const getHtmlBody = (attendance = 'Não informado', congregation = 'Nordeste', meeting) => {
 	return `
@@ -54,6 +60,11 @@ const sendEmail = async (req, res) => {
 		});
 
 		console.log(JSON.stringify(info, null, 4));
+
+		const dateKey = moment().format('YYYY-MM-DD');
+		const redisKey = `${id}:${dateKey}`;
+		await redis.set(redisKey, attendance);
+		console.log(`Redis salvo: ${redisKey} = ${attendance}`);
 
 		res.status(200).json({ success: true, message: 'E-mail enviado com sucesso!' });
 	} catch (error) {
